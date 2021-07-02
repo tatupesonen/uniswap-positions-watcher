@@ -2,21 +2,17 @@ import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 
 const Options = () => {
-  const [color, setColor] = useState<string>();
+  const [addresses, setAddresses] = useState<string[]>([]);
   const [status, setStatus] = useState<string>();
-  const [like, setLike] = useState<boolean>();
 
   useEffect(() => {
-    // Restores select box and checkbox state using the preferences
-    // stored in chrome.storage.
+    // On component load, get the addresses from browser storage.
     chrome.storage.sync.get(
       {
-        favoriteColor: "red",
-        likesColor: true,
+        addresses: [],
       },
-      (items) => {
-        setColor(items.favoriteColor);
-        setLike(items.likesColor);
+      (fetchedOptions) => {
+        setAddresses(fetchedOptions.addresses)
       }
     );
   }, []);
@@ -25,8 +21,7 @@ const Options = () => {
     // Saves options to chrome.storage.sync.
     chrome.storage.sync.set(
       {
-        favoriteColor: color,
-        likesColor: like,
+        addresses
       },
       () => {
         // Update status to let user know options were saved.
@@ -42,26 +37,12 @@ const Options = () => {
   return (
     <>
       <div>
-        Favorite color:&nbsp;
-        <select
-          value={color}
-          onChange={(event) => setColor(event.target.value)}
+        Current tracked Ethereum address:
+        <input
+          value={addresses[0]}
+          onChange={(event) => setAddresses([event.target.value])}
         >
-          <option value="red">red</option>
-          <option value="green">green</option>
-          <option value="blue">blue</option>
-          <option value="yellow">yellow</option>
-        </select>
-      </div>
-      <div>
-        <label>
-          <input
-            type="checkbox"
-            checked={like}
-            onChange={(event) => setLike(event.target.checked)}
-          />
-          I like colors.
-        </label>
+        </input>
       </div>
       <div>{status}</div>
       <button onClick={saveOptions}>Save</button>
