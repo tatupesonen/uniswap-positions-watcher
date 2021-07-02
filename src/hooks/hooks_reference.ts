@@ -1,227 +1,19 @@
-//@ts-nocheck
 // Partial source code of Stakewise dAPP (from tsudmi)
+
 import { useMemo } from 'react'
 import { BigNumber } from '@ethersproject/bignumber'
 import { useWeb3React } from '@web3-react/core'
 import { Contract } from '@ethersproject/contracts'
-import useSWR from 'swr'
+import useSWR, { SWRConfiguration } from 'swr'
 
-const uniswapV3PositionManagerAbi = [
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'owner',
-        type: 'address',
-      },
-    ],
-    name: 'balanceOf',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: 'tokenId',
-        type: 'uint256',
-      },
-    ],
-    name: 'positions',
-    outputs: [
-      {
-        internalType: 'uint96',
-        name: 'nonce',
-        type: 'uint96',
-      },
-      {
-        internalType: 'address',
-        name: 'operator',
-        type: 'address',
-      },
-      {
-        internalType: 'address',
-        name: 'token0',
-        type: 'address',
-      },
-      {
-        internalType: 'address',
-        name: 'token1',
-        type: 'address',
-      },
-      {
-        internalType: 'uint24',
-        name: 'fee',
-        type: 'uint24',
-      },
-      {
-        internalType: 'int24',
-        name: 'tickLower',
-        type: 'int24',
-      },
-      {
-        internalType: 'int24',
-        name: 'tickUpper',
-        type: 'int24',
-      },
-      {
-        internalType: 'uint128',
-        name: 'liquidity',
-        type: 'uint128',
-      },
-      {
-        internalType: 'uint256',
-        name: 'feeGrowthInside0LastX128',
-        type: 'uint256',
-      },
-      {
-        internalType: 'uint256',
-        name: 'feeGrowthInside1LastX128',
-        type: 'uint256',
-      },
-      {
-        internalType: 'uint128',
-        name: 'tokensOwed0',
-        type: 'uint128',
-      },
-      {
-        internalType: 'uint128',
-        name: 'tokensOwed1',
-        type: 'uint128',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'owner',
-        type: 'address',
-      },
-      {
-        internalType: 'uint256',
-        name: 'index',
-        type: 'uint256',
-      },
-    ],
-    name: 'tokenOfOwnerByIndex',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        components: [
-          {
-            internalType: 'uint256',
-            name: 'tokenId',
-            type: 'uint256',
-          },
-          {
-            internalType: 'address',
-            name: 'recipient',
-            type: 'address',
-          },
-          {
-            internalType: 'uint128',
-            name: 'amount0Max',
-            type: 'uint128',
-          },
-          {
-            internalType: 'uint128',
-            name: 'amount1Max',
-            type: 'uint128',
-          },
-        ],
-        internalType: 'struct INonfungiblePositionManager.CollectParams',
-        name: 'params',
-        type: 'tuple',
-      },
-    ],
-    name: 'collect',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: 'amount0',
-        type: 'uint256',
-      },
-      {
-        internalType: 'uint256',
-        name: 'amount1',
-        type: 'uint256',
-      },
-    ],
-    stateMutability: 'payable',
-    type: 'function',
-  },
-]
-
-function getUniswapV3PositionManager(library) {
-  return new Contract(
-    process.env.REACT_APP_UNISWAP_V3_POSITION_MANAGER_CONTRACT_ADDRESS,
-    uniswapV3PositionManagerAbi,
-    library
-  )
+type useContractRequestProps = {
+  contract: Contract
+  methodName: string
+  callInputs: any[]
+  callback: null | ((params: any) => any)
+  performRequest: boolean
+  swrConfig?: SWRConfiguration
 }
-
-const multicallAbi = [
-  {
-    inputs: [
-      {
-        components: [
-          {
-            name: 'target',
-            type: 'address',
-          },
-          {
-            name: 'callData',
-            type: 'bytes',
-          },
-        ],
-        name: 'calls',
-        type: 'tuple[]',
-      },
-    ],
-    name: 'aggregate',
-    outputs: [
-      {
-        name: 'blockNumber',
-        type: 'uint256',
-      },
-      {
-        name: 'returnData',
-        type: 'bytes[]',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-]
-
-function getMulticall(library) {
-  return new Contract(
-    process.env.REACT_APP_MULTICALL_CONTRACT_ADDRESS,
-    multicallAbi,
-    library
-  )
-}
-
 /** Hook for calling function of the smart contracts. */
 function useContractRequest({
   contract,
@@ -230,7 +22,7 @@ function useContractRequest({
   callback = null,
   performRequest = true,
   swrConfig = {},
-}) {
+}: useContractRequestProps) {
   const callContract = useMemo(
     () => performRequest && contract && methodName,
     [contract, methodName, performRequest]
@@ -247,6 +39,15 @@ function useContractRequest({
   return data
 }
 
+type useMulticallContractRequestProps = {
+  contracts: Contract[]
+  methodNames: string[]
+  callInputs: any[]
+  callback?: null | ((params: any) => any)
+  performRequest: boolean
+  swrConfig?: SWRConfiguration
+}
+
 /** Hook for calling multiple functions of the smart contracts in a single call. */
 function useMulticallContractRequest({
   contracts,
@@ -255,7 +56,7 @@ function useMulticallContractRequest({
   callback = null,
   performRequest = true,
   swrConfig = {},
-}) {
+}: useMulticallContractRequestProps) {
   const { library } = useWeb3React()
   const multicallContract = getMulticall(library)
   const multicallChangeKeys = useMemo(
@@ -295,12 +96,12 @@ function useMulticallContractRequest({
   }, [callInputs, contracts, fragments, multicallChangeKeys])
 
   const { data } = useSWR(
-    multicallChangeKeys,
+    calls,
     () =>
       multicallContract
         .aggregate(calls)
-        .then((result) =>
-          result?.returnData?.map((data, i) =>
+        .then((result: any) =>
+          result?.returnData?.map((data: any, i: number) =>
             contracts[i].interface.decodeFunctionResult(fragments[i], data)
           )
         )
@@ -335,8 +136,10 @@ export default function useUniswapV3Positions() {
     callInputs: Array.from({ length: numberOfNFTs }, (_, i) => [account, i]),
     performRequest: !!(account && numberOfNFTs),
     callback: (tokenIds) => {
-      let parsedTokenIds = tokenIds?.map((tokenId) => tokenId?.toString())
-      if (parsedTokenIds?.every((tokenId) => !!tokenId)) {
+      let parsedTokenIds = tokenIds?.map((tokenId: number) =>
+        tokenId?.toString()
+      )
+      if (parsedTokenIds?.every((tokenId: number) => !!tokenId)) {
         return parsedTokenIds
       }
       return null
@@ -352,13 +155,13 @@ export default function useUniswapV3Positions() {
       { length: tokenIds?.length || 0 },
       () => 'positions'
     ),
-    callInputs: tokenIds?.map((tokenId) => [BigNumber.from(tokenId)]),
+    callInputs: tokenIds?.map((tokenId: number) => [BigNumber.from(tokenId)]),
     performRequest: !!(account && tokenIds?.length),
   })
 
   return useMemo(
     () =>
-      positions?.map((position, i) => ({
+      positions?.map((position: any, i: number) => ({
         tokenId: tokenIds[i],
         owner: account,
         fee: position.fee,
