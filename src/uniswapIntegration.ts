@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { Contract } from '@ethersproject/contracts';
 import { useWeb3React } from '@web3-react/core';
 import { uniswapV3PositionManagerAbi } from './abi/uniswapV3PositionManagerAbi';
@@ -10,6 +11,7 @@ function getUniswapV3PositionManager(library: any) {
     library
   );
 }
+
 function getMulticall(library: any) {
   return new Contract(
     process.env.REACT_APP_MULTICALL_CONTRACT_ADDRESS,
