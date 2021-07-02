@@ -1,4 +1,6 @@
-export const uniswapV3PositionManagerAbi = [
+import { ContractInterface } from '@ethersproject/contracts';
+
+export const uniswapV3PositionManagerAbi: ContractInterface = [
   {
     inputs: [
       {
@@ -162,4 +164,4 @@ export const uniswapV3PositionManagerAbi = [
     stateMutability: 'payable',
     type: 'function',
   },
-]
+];

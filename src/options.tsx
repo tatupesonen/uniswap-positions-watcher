@@ -1,31 +1,31 @@
-import React, { useEffect, useState } from 'react'
-import ReactDOM from 'react-dom'
-import { getAddressesStorage, setAddressesStorage } from './storageUtils'
+import React, { useEffect, useState } from 'react';
+import ReactDOM from 'react-dom';
+import { getAddressesStorage, setAddressesStorage } from './storageUtils';
 
 const Options = () => {
-  const [input, setInput] = useState<string>('')
-  const [addresses, setAddresses] = useState<string[]>([])
-  const [status, setStatus] = useState<string>()
+  const [input, setInput] = useState<string>('');
+  const [addresses, setAddresses] = useState<string[]>([]);
+  const [status, setStatus] = useState<string>();
 
   useEffect(() => {
     // On component load, get the addresses from browser storage.
     getAddressesStorage((addressList) => {
-      setAddresses(addressList)
-    })
-  }, [])
+      setAddresses(addressList);
+    });
+  }, []);
 
   const saveOptions = () => {
     // Saves options to chrome.storage.sync.
     setAddressesStorage([input], () => {
       // Update status to let user know options were saved.
-      setStatus('Options saved.')
-      setAddresses([input])
+      setStatus('Options saved.');
+      setAddresses([input]);
       const id = setTimeout(() => {
-        setStatus(undefined)
-      }, 1000)
-      return () => clearTimeout(id)
-    })
-  }
+        setStatus(undefined);
+      }, 1000);
+      return () => clearTimeout(id);
+    });
+  };
 
   return (
     <>
@@ -46,12 +46,12 @@ const Options = () => {
       <div>{status}</div>
       <button onClick={saveOptions}>Save</button>
     </>
-  )
-}
+  );
+};
 
 ReactDOM.render(
   <React.StrictMode>
     <Options />
   </React.StrictMode>,
   document.getElementById('root')
-)
+);

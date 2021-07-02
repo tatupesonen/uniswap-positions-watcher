@@ -1,19 +1,19 @@
 // Partial source code of Stakewise dAPP (from tsudmi)
-
-import { useMemo } from 'react'
-import { BigNumber } from '@ethersproject/bignumber'
-import { useWeb3React } from '@web3-react/core'
-import { Contract } from '@ethersproject/contracts'
-import useSWR, { SWRConfiguration } from 'swr'
+//@ts-nocheck
+import { useMemo } from 'react';
+import { BigNumber } from '@ethersproject/bignumber';
+import { useWeb3React } from '@web3-react/core';
+import { Contract } from '@ethersproject/contracts';
+import useSWR, { SWRConfiguration } from 'swr';
 
 type useContractRequestProps = {
-  contract: Contract
-  methodName: string
-  callInputs: any[]
-  callback: null | ((params: any) => any)
-  performRequest: boolean
-  swrConfig?: SWRConfiguration
-}
+  contract: Contract;
+  methodName: string;
+  callInputs: any[];
+  callback: null | ((params: any) => any);
+  performRequest: boolean;
+  swrConfig?: SWRConfiguration;
+};
 /** Hook for calling function of the smart contracts. */
 function useContractRequest({
   contract,
@@ -26,7 +26,7 @@ function useContractRequest({
   const callContract = useMemo(
     () => performRequest && contract && methodName,
     [contract, methodName, performRequest]
-  )
+  );
 
   const { data } = useSWR(
     callContract
@@ -34,19 +34,19 @@ function useContractRequest({
       : null,
     () => contract[methodName](...callInputs).then(callback),
     swrConfig
-  )
+  );
 
-  return data
+  return data;
 }
 
 type useMulticallContractRequestProps = {
-  contracts: Contract[]
-  methodNames: string[]
-  callInputs: any[]
-  callback?: null | ((params: any) => any)
-  performRequest: boolean
-  swrConfig?: SWRConfiguration
-}
+  contracts: Contract[];
+  methodNames: string[];
+  callInputs: any[];
+  callback?: null | ((params: any) => any);
+  performRequest: boolean;
+  swrConfig?: SWRConfiguration;
+};
 
 /** Hook for calling multiple functions of the smart contracts in a single call. */
 function useMulticallContractRequest({
@@ -57,8 +57,8 @@ function useMulticallContractRequest({
   performRequest = true,
   swrConfig = {},
 }: useMulticallContractRequestProps) {
-  const { library } = useWeb3React()
-  const multicallContract = getMulticall(library)
+  const { library } = useWeb3React();
+  const multicallContract = getMulticall(library);
   const multicallChangeKeys = useMemo(
     () =>
       performRequest &&
@@ -71,7 +71,7 @@ function useMulticallContractRequest({
       contracts?.length === methodNames?.length &&
       contracts?.length === callInputs?.length,
     [callInputs, contracts, methodNames, performRequest]
-  )
+  );
 
   const fragments = useMemo(
     () =>
@@ -79,11 +79,11 @@ function useMulticallContractRequest({
         contract?.interface?.getFunction(methodNames[i])
       ),
     [contracts, methodNames]
-  )
+  );
 
   const calls = useMemo(() => {
     if (!multicallChangeKeys) {
-      return null
+      return null;
     }
 
     return contracts?.map((contract, i) => ({
@@ -92,8 +92,8 @@ function useMulticallContractRequest({
         fragments[i],
         callInputs[i]
       ),
-    }))
-  }, [callInputs, contracts, fragments, multicallChangeKeys])
+    }));
+  }, [callInputs, contracts, fragments, multicallChangeKeys]);
 
   const { data } = useSWR(
     calls,
@@ -107,13 +107,13 @@ function useMulticallContractRequest({
         )
         .then(callback),
     swrConfig
-  )
-  return data
+  );
+  return data;
 }
 
 export default function useUniswapV3Positions() {
-  const { account, library } = useWeb3React()
-  const uniswapV3PositionManagerContract = getUniswapV3PositionManager(library)
+  const { account, library } = useWeb3React();
+  const uniswapV3PositionManagerContract = getUniswapV3PositionManager(library);
 
   const numberOfNFTs = useContractRequest({
     contract: uniswapV3PositionManagerContract,
@@ -122,7 +122,7 @@ export default function useUniswapV3Positions() {
     performRequest: !!account,
     // we don't expect any account balance to ever exceed the bounds of max safe int
     callback: (balance) => balance?.toNumber(),
-  })
+  });
 
   const tokenIds = useMulticallContractRequest({
     contracts: Array.from(
@@ -138,13 +138,13 @@ export default function useUniswapV3Positions() {
     callback: (tokenIds) => {
       let parsedTokenIds = tokenIds?.map((tokenId: number) =>
         tokenId?.toString()
-      )
+      );
       if (parsedTokenIds?.every((tokenId: number) => !!tokenId)) {
-        return parsedTokenIds
+        return parsedTokenIds;
       }
-      return null
+      return null;
     },
-  })
+  });
 
   const positions = useMulticallContractRequest({
     contracts: Array.from(
@@ -157,7 +157,7 @@ export default function useUniswapV3Positions() {
     ),
     callInputs: tokenIds?.map((tokenId: number) => [BigNumber.from(tokenId)]),
     performRequest: !!(account && tokenIds?.length),
-  })
+  });
 
   return useMemo(
     () =>
@@ -178,5 +178,5 @@ export default function useUniswapV3Positions() {
         tokensOwed1: position.tokensOwed1,
       })),
     [account, positions, tokenIds]
-  )
+  );
 }
