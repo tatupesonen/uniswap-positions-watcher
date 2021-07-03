@@ -4,6 +4,7 @@ import { useTokens } from './hooks/useTokens';
 import { Token } from './types';
 
 const PositionWarningPopup = () => {
+  // Load ERC-20 token data from CoinGecko
   const { data: result, error } = useTokens();
   const [count, setCount] = useState(0);
 
@@ -12,7 +13,7 @@ const PositionWarningPopup = () => {
 
   return (
     <>
-      {result.map((t: Token, i: number) => (
+      {result.tokens.map((t: Token, i: number) => (
         <p key={i}>{t.name}</p>
       ))}
       <ul style={{ minWidth: '700px' }}>
