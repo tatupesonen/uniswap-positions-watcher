@@ -20,6 +20,8 @@
     "@ethersproject/bignumber": "^5.4.0",
     "@ethersproject/contracts": "^5.4.0",
     "@web3-react/core": "^6.1.9",
+    "graphql": "^15.5.1",
+    "graphql-request": "^3.4.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "swr": "^0.5.6"
