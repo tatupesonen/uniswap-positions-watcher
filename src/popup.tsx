@@ -1,42 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
+import { useTokens } from './hooks/useTokens';
+import { Token } from './types';
 
 const PositionWarningPopup = () => {
+  const { data: result, error } = useTokens();
   const [count, setCount] = useState(0);
 
-  useEffect(() => {
-    chrome.browserAction.setBadgeText({ text: count.toString() });
-  }, [count]);
-
-  const changeBackground = () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      const tab = tabs[0];
-      if (tab.id) {
-        chrome.tabs.sendMessage(
-          tab.id,
-          {
-            color: '#555555',
-          },
-          (msg) => {
-            console.log('result message:', msg);
-          }
-        );
-      }
-    });
-  };
+  if (error) return <h1>Could not load token data</h1>;
+  if (!result) return <h1>Loading...</h1>;
 
   return (
     <>
+      {result.map((t: Token, i: number) => (
+        <p key={i}>{t.name}</p>
+      ))}
       <ul style={{ minWidth: '700px' }}>
         <li>Current Time test: {new Date().toLocaleTimeString()}</li>
       </ul>
-      <button
-        onClick={() => setCount(count + 1)}
-        style={{ marginRight: '5px' }}
-      >
-        count up
-      </button>
-      <button onClick={changeBackground}>change background</button>
     </>
   );
 };

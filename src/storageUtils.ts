@@ -11,7 +11,6 @@ type StorageGetCallback = (returnValues: any) => void;
 const addressStorageKey = 'addresses';
 
 export const setStorageValue = (item: StorageItem, cb: StorageSetCallback) => {
-  console.error(JSON.stringify(item));
   chrome.storage.sync.set({ [item.key]: item.value }, cb);
 };
 

@@ -1,16 +1,13 @@
 import useSWR from 'swr';
+import { Token } from '../types';
 
-export function useTokens() {
+export function useTokens(): any {
   const endpoint = 'https://tokens.coingecko.com/uniswap/all.json';
-  const getData = async () => {
-    const response = await fetch(endpoint);
-    return await response.json();
-  };
-
-  const { data: tokens } = useSWR(
+  const fetcher = (url: string) => fetch(url).then((res: any) => res.json());
+  const { data, error } = useSWR(
     'https://tokens.coingecko.com/uniswap/all.json',
-    getData
+    fetcher
   );
 
-  return tokens;
+  return { data, error };
 }
